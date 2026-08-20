@@ -1,13 +1,8 @@
 import cv2
 
-cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+cap = cv2.VideoCapture(0)
 
-if not cap.isOpened():
-    print("Camera open nahi hua!")
-    exit()
-
-print("Camera open hai.")
-print("ESC dabakar band karo.")
+print("Camera test start...")
 
 while True:
     ret, frame = cap.read()
@@ -18,13 +13,8 @@ while True:
 
     cv2.imshow("Camera Test", frame)
 
-    # ESC = 27
-    key = cv2.waitKey(30)
-
-    if key == 27:
+    if cv2.waitKey(1) & 0xFF == ord("q"):
         break
 
 cap.release()
 cv2.destroyAllWindows()
-
-print("Camera closed.")
