@@ -30,7 +30,7 @@ def start_gui_camera():
     if not cap.isOpened():
         messagebox.showerror(
             "Camera Error",
-            "Camera open nahi hua!"
+            "Could not open camera!"
         )
         return
 
@@ -73,7 +73,7 @@ def update_camera():
         image = Image.fromarray(frame)
 
         image = image.resize(
-            (496, 216)
+            (496, 180)
         )
 
         photo = ImageTk.PhotoImage(image)
@@ -101,7 +101,7 @@ def register_face():
 
         messagebox.showerror(
             "Error",
-            "capture_photo.py nahi mila!"
+            "capture_photo.py not found!"
         )
 
         return
@@ -128,8 +128,8 @@ def register_face():
 
         messagebox.showinfo(
             "Register Face",
-            "Camera open ho raha hai.\n\n"
-            "Face camera ke saamne rakho."
+            "Opening camera...\n\n"
+            "Position your face in front of the camera."
         )
 
         start_gui_camera()
@@ -154,7 +154,7 @@ def start_recognition():
 
         messagebox.showerror(
             "Error",
-            "live_test.py nahi mila!"
+            "live_test.py not found!"
         )
 
         return
@@ -172,7 +172,7 @@ def start_recognition():
 
         messagebox.showinfo(
             "Live Recognition",
-            "Live Recognition camera open ho raha hai."
+            "Live Recognition camera is opening."
         )
 
         start_gui_camera()
@@ -197,7 +197,7 @@ def view_attendance():
 
         messagebox.showinfo(
             "Attendance",
-            "Abhi attendance record available nahi hai."
+            "No attendance records available yet."
         )
 
         return
@@ -237,179 +237,272 @@ root.title(
     "Face Recognition Attendance System"
 )
 
-root.geometry(
-    "600x750"
-)
-
-root.resizable(
-    False,
-    False
-)
+# Start maximized (fullscreen on Windows)
+root.state('zoomed')
 
 root.configure(
-    bg="#0f172a"
+    bg="#0d1117"
 )
 
+# Set minimum size to prevent squishing
+root.minsize(800, 600)
+
 
 # ==========================================
-# HEADER
+# STYLES
 # ==========================================
+
+BG_DARK = "#0d1117"
+BG_CARD = "#161b22"
+BG_CARD_HOVER = "#1f2428"
+BORDER = "#30363d"
+TEXT_PRIMARY = "#e6edf3"
+TEXT_SECONDARY = "#8b949e"
+TEXT_MUTED = "#6e7681"
+ACCENT_BLUE = "#58a6ff"
+ACCENT_GREEN = "#3fb950"
+ACCENT_ORANGE = "#d29922"
+ACCENT_RED = "#f85149"
+
+
+def create_modern_button(parent, text, command, bg_color, hover_color, width=28, height=2, font_size=13):
+    """Create a modern flat button with hover effect"""
+    btn = tk.Button(
+        parent,
+        text=text,
+        command=command,
+        font=("Segoe UI", font_size, "bold"),
+        width=width,
+        height=height,
+        bg=bg_color,
+        fg="white",
+        activebackground=hover_color,
+        activeforeground="white",
+        relief="flat",
+        cursor="hand2",
+        bd=0,
+        highlightthickness=0
+    )
+    
+    def on_enter(e):
+        btn.config(bg=hover_color)
+    def on_leave(e):
+        btn.config(bg=bg_color)
+    
+    btn.bind("<Enter>", on_enter)
+    btn.bind("<Leave>", on_leave)
+    return btn
+
+
+def create_card_frame(parent):
+    """Create a card-style frame"""
+    frame = tk.Frame(
+        parent,
+        bg=BG_CARD,
+        highlightbackground=BORDER,
+        highlightthickness=1
+    )
+    return frame
+
+
+# ==========================================
+# HEADER SECTION
+# ==========================================
+
+header_frame = tk.Frame(root, bg=BG_DARK)
+header_frame.pack(fill="x", pady=(15, 5))
 
 title = tk.Label(
-    root,
+    header_frame,
     text="FACE RECOGNITION",
-    font=("Arial", 26, "bold"),
-    bg="#0f172a",
-    fg="white"
+    font=("Segoe UI", 24, "bold"),
+    bg=BG_DARK,
+    fg=TEXT_PRIMARY
 )
-
-title.pack(
-    pady=(25, 0)
-)
-
+title.pack()
 
 subtitle = tk.Label(
-    root,
+    header_frame,
     text="ATTENDANCE SYSTEM",
-    font=("Arial", 18, "bold"),
-    bg="#0f172a",
-    fg="#60a5fa"
+    font=("Segoe UI", 14, "bold"),
+    bg=BG_DARK,
+    fg=ACCENT_BLUE
 )
+subtitle.pack(pady=(3, 0))
 
-subtitle.pack(
-    pady=(2, 20)
-)
+# Divider line
+divider = tk.Frame(root, height=1, bg=BORDER)
+divider.pack(fill="x", padx=30, pady=10)
 
 
 # ==========================================
-# REGISTER BUTTON
+# CAMERA PREVIEW CARD
 # ==========================================
 
-register_button = tk.Button(
-    root,
-    text="REGISTER FACE",
-    command=register_face,
-    font=("Arial", 14, "bold"),
-    width=25,
-    height=2,
-    bg="#2563eb",
-    fg="white",
-    activebackground="#1d4ed8",
-    activeforeground="white",
-    relief="flat",
-    cursor="hand2"
+camera_card = create_card_frame(root)
+camera_card.pack(fill="x", padx=20, pady=5)
+
+camera_header = tk.Frame(camera_card, bg=BG_CARD)
+camera_header.pack(fill="x", padx=15, pady=(10, 3))
+
+camera_title = tk.Label(
+    camera_header,
+    text="CAMERA PREVIEW",
+    font=("Segoe UI", 11, "bold"),
+    bg=BG_CARD,
+    fg=TEXT_SECONDARY
 )
+camera_title.pack(side="left")
 
-register_button.pack(
-    pady=8
+status_indicator = tk.Label(
+    camera_header,
+    text="● LIVE",
+    font=("Segoe UI", 9, "bold"),
+    bg=BG_CARD,
+    fg=ACCENT_GREEN
 )
-
-
-# ==========================================
-# CAMERA AREA
-# ==========================================
+status_indicator.pack(side="right")
 
 camera_frame = tk.Frame(
-    root,
-    width=500,
-    height=220,
-    bg="#020617",
-    highlightbackground="#334155",
-    highlightthickness=2
+    camera_card,
+    width=520,
+    height=180,
+    bg="#000000",
+    highlightbackground=BORDER,
+    highlightthickness=1
 )
-
-camera_frame.pack(
-    pady=15
-)
-
-camera_frame.pack_propagate(
-    False
-)
-
+camera_frame.pack(padx=15, pady=(0, 12))
+camera_frame.pack_propagate(False)
 
 camera_label = tk.Label(
     camera_frame,
-    text="CAMERA AREA",
-    font=("Arial", 20, "bold"),
-    bg="#020617",
-    fg="#94a3b8"
+    text="Initializing camera...",
+    font=("Segoe UI", 12),
+    bg="#000000",
+    fg=TEXT_MUTED
 )
-
-camera_label.pack(
-    expand=True
-)
+camera_label.pack(expand=True)
 
 
 # ==========================================
-# LIVE RECOGNITION
+# CONTROL BUTTONS CARD
 # ==========================================
 
-live_button = tk.Button(
-    root,
-    text="LIVE RECOGNITION",
-    command=start_recognition,
-    font=("Arial", 14, "bold"),
-    width=25,
-    height=2,
-    bg="#16a34a",
-    fg="white",
-    activebackground="#15803d",
-    activeforeground="white",
-    relief="flat",
-    cursor="hand2"
-)
+controls_card = create_card_frame(root)
+controls_card.pack(fill="x", padx=20, pady=5)
 
-live_button.pack(
-    pady=7
+controls_title = tk.Label(
+    controls_card,
+    text="CONTROLS",
+    font=("Segoe UI", 11, "bold"),
+    bg=BG_CARD,
+    fg=TEXT_SECONDARY
 )
+controls_title.pack(anchor="w", padx=15, pady=(10, 5))
+
+buttons_frame = tk.Frame(controls_card, bg=BG_CARD)
+buttons_frame.pack(padx=15, pady=(0, 10))
+
+# Register Face Button
+register_button = create_modern_button(
+    buttons_frame,
+    "REGISTER FACE",
+    register_face,
+    ACCENT_BLUE,
+    "#3b82f6",
+    width=28,
+    height=1,
+    font_size=12
+)
+register_button.pack(pady=4)
+
+# Start Recognition Button
+live_button = create_modern_button(
+    buttons_frame,
+    "START RECOGNITION",
+    start_recognition,
+    ACCENT_GREEN,
+    "#3fb950",
+    width=28,
+    height=1,
+    font_size=12
+)
+live_button.pack(pady=4)
+
+# View Attendance Button
+attendance_button = create_modern_button(
+    buttons_frame,
+    "VIEW ATTENDANCE",
+    view_attendance,
+    ACCENT_ORANGE,
+    "#d29922",
+    width=28,
+    height=1,
+    font_size=12
+)
+attendance_button.pack(pady=4)
+
+# Exit Button
+exit_button = create_modern_button(
+    buttons_frame,
+    "EXIT",
+    exit_app,
+    ACCENT_RED,
+    "#f85149",
+    width=28,
+    height=1,
+    font_size=12
+)
+exit_button.pack(pady=4)
 
 
 # ==========================================
-# VIEW ATTENDANCE
+# INFO CARD
 # ==========================================
 
-attendance_button = tk.Button(
-    root,
-    text="VIEW ATTENDANCE",
-    command=view_attendance,
-    font=("Arial", 14, "bold"),
-    width=25,
-    height=2,
-    bg="#f59e0b",
-    fg="white",
-    activebackground="#d97706",
-    activeforeground="white",
-    relief="flat",
-    cursor="hand2"
+info_card = create_card_frame(root)
+info_card.pack(fill="x", padx=20, pady=5)
+
+info_title = tk.Label(
+    info_card,
+    text="SYSTEM INFO",
+    font=("Segoe UI", 11, "bold"),
+    bg=BG_CARD,
+    fg=TEXT_SECONDARY
 )
+info_title.pack(anchor="w", padx=15, pady=(8, 5))
 
-attendance_button.pack(
-    pady=7
-)
+info_items = [
+    ("Model", "YuNet + SFace"),
+    ("Format", "ONNX (CPU Optimized)"),
+    ("Storage", "CSV (attendance.csv)"),
+    ("Threshold", "0.30 Cosine Similarity"),
+]
 
+for label, value in info_items:
+    item_frame = tk.Frame(info_card, bg=BG_CARD)
+    item_frame.pack(fill="x", padx=15, pady=1)
+    
+    tk.Label(
+        item_frame,
+        text=label + ":",
+        font=("Segoe UI", 9),
+        bg=BG_CARD,
+        fg=TEXT_MUTED,
+        width=10,
+        anchor="w"
+    ).pack(side="left")
+    
+    tk.Label(
+        item_frame,
+        text=value,
+        font=("Segoe UI", 9, "bold"),
+        bg=BG_CARD,
+        fg=TEXT_PRIMARY,
+        anchor="w"
+    ).pack(side="left")
 
-# ==========================================
-# EXIT
-# ==========================================
-
-exit_button = tk.Button(
-    root,
-    text="EXIT",
-    command=exit_app,
-    font=("Arial", 14, "bold"),
-    width=25,
-    height=2,
-    bg="#dc2626",
-    fg="white",
-    activebackground="#b91c1c",
-    activeforeground="white",
-    relief="flat",
-    cursor="hand2"
-)
-
-exit_button.pack(
-    pady=7
-)
+tk.Frame(info_card, height=5, bg=BG_CARD).pack()
 
 
 # ==========================================
@@ -418,15 +511,12 @@ exit_button.pack(
 
 footer = tk.Label(
     root,
-    text="Face Recognition • Automated Attendance",
-    font=("Arial", 10),
-    bg="#0f172a",
-    fg="#64748b"
+    text="Face Recognition • Automated Attendance System",
+    font=("Segoe UI", 8),
+    bg=BG_DARK,
+    fg=TEXT_MUTED
 )
-
-footer.pack(
-    pady=18
-)
+footer.pack(pady=8)
 
 
 # ==========================================

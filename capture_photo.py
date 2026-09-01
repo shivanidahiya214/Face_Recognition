@@ -6,48 +6,49 @@ print("===================================")
 print("       FACE PHOTO CAPTURE")
 print("===================================")
 
-# GUI se name receive karo
+# Get name from GUI argument
 if len(sys.argv) > 1:
     name = sys.argv[1]
 else:
-    name = input("Person ka naam enter karo: ")
+    name = input("Enter person's name: ")
 
 name = name.strip()
 
 if not name:
-    print("Name nahi diya gaya!")
+    print("No name provided!")
     exit()
 
-# Folder create karo
+# Create folder
 folder = "known_faces"
 
 if not os.path.exists(folder):
     os.makedirs(folder)
 
-# Camera open
+# Open camera
 cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
 if not cap.isOpened():
-    print("Camera open nahi hua!")
+    print("Could not open camera!")
     exit()
 
 print()
 print("Camera started!")
-print("Face camera ke saamne rakho.")
-print("SPACE dabao = Photo capture")
-print("Q dabao = Exit")
+print("Position your face in front of the camera.")
+print("Press SPACE = Capture photo")
+print("Press Q = Exit")
 
 while True:
 
     ret, frame = cap.read()
 
     if not ret:
-        print("Frame nahi mila!")
+        print("Frame not captured!")
         break
 
+    # Draw instructions on frame
     cv2.putText(
         frame,
-        "SPACE = Capture | Q = Exit",
+        "SPACE = Capture Photo  |  Q = Exit",
         (20, 40),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.7,
@@ -55,11 +56,20 @@ while True:
         2
     )
 
+    # Draw center guide
+    h, w = frame.shape[:2]
+    center_x, center_y = w // 2, h // 2
+    cv2.circle(frame, (center_x, center_y), 100, (0, 255, 0), 2)
+    cv2.line(frame, (center_x - 120, center_y), (center_x - 80, center_y), (0, 255, 0), 2)
+    cv2.line(frame, (center_x + 80, center_y), (center_x + 120, center_y), (0, 255, 0), 2)
+    cv2.line(frame, (center_x, center_y - 120), (center_x, center_y - 80), (0, 255, 0), 2)
+    cv2.line(frame, (center_x, center_y + 80), (center_x, center_y + 120), (0, 255, 0), 2)
+
     cv2.imshow("Photo Capture", frame)
 
     key = cv2.waitKey(1) & 0xFF
 
-    # SPACE = Photo capture
+    # SPACE = Capture photo
     if key == 32:
 
         file_path = os.path.join(
@@ -77,7 +87,7 @@ while True:
             print("Photo successfully saved!")
             print("File:", file_path)
         else:
-            print("Photo save nahi hui!")
+            print("Failed to save photo!")
 
         break
 
